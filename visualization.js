@@ -3,8 +3,8 @@ class Person {
         this.type = type
         this.x = x
         this.y = y
-        this.target_x = -100
-        this.target_y = -100
+        this.target_x = -1e7
+        this.target_y = 0
     }
 
     setTarget(x, y) {
@@ -12,15 +12,26 @@ class Person {
         this.target_y = y
     }
 
+    gotoTarget() {
+        this.x = this.target_x
+        this.y = this.target_y
+    }
+
     updatePos(percent) {
-        const dx = this.target_x - this.x
-        const dy = this.target_y - this.y
-        this.x = this.x + dx * percent
-        this.y = this.y + dy * percent
+        if(this.target_x >= -1e7 && this.target_x < -1e3) {
+            const dx = - this.x - boxSize
+            this.x = this.x + dx * percent
+        } else {
+            const dx = this.target_x - this.x
+            const dy = this.target_y - this.y
+            this.x = this.x + dx * percent
+            this.y = this.y + dy * percent
+        }
     }
 
 }
 
+var speed = 900
 var intervalCount = 0
 const boxSize = 50
 const timePerStep = 1000
@@ -46,7 +57,7 @@ function start() {
     let employee_line_x = innerWidth * 9 / 10 - boxSize * 5
     let atm_line_x = innerWidth * 9 / 10 - boxSize * 5
 
-    canvas.height =  height
+    canvas.height = height
 
     let employee_line = 0
     let atm_line = 0
@@ -54,7 +65,7 @@ function start() {
     c = canvas.getContext('2d')
 
     for(let i=0; i < data[0]; ++i) {
-        customers[i] = new Person(0, -boxSize, height / 2)
+        customers[i] = new Person(0, -1e7, 0)
     }
 
     for(let i=0; i < data[1]; ++i) {
@@ -65,7 +76,6 @@ function start() {
         atms[i] = new Person(2, innerWidth * 9 / 10, (i + 2 + data[1] * 1) * 100)
     }
 
-    let currentTime = 0
     let i = 1
 
     function step() {
@@ -76,7 +86,7 @@ function start() {
         if(eventType == 0) {
             if(customers[customerID].x < 0) {
                 customers[customerID].x = 0
-                customers[customerID].y = employee_line_y
+                customers[customerID].y = height / 2
             }
             customers[customerID].setTarget(employee_line_x - employee_line * boxSize * 2, employee_line_y)
             ++employee_line
@@ -85,7 +95,7 @@ function start() {
         if(eventType == 1) {
             if(customers[customerID].x < 0) {
                 customers[customerID].x = 0
-                customers[customerID].y = atm_line_y
+                customers[customerID].y = height / 2
             }
             customers[customerID].setTarget(atm_line_x - atm_line * boxSize * 2, atm_line_y)
             ++atm_line
@@ -95,11 +105,9 @@ function start() {
             const employeeID = data[3] * 1
             customers[customerID].setTarget(employee_line_x + boxSize * 2, employees[employeeID].y)
             for(let j=0; j < customers.length; ++j) {
-                if(customers[j].y == employee_line_y && customers[j].target_y == employee_line_y 
+                if((customers[j].y == employee_line_y || customers[j].y == height / 2) && customers[j].target_y == employee_line_y
                     && customers[j].x != employee_line_x + boxSize * 2 && customers[j].target_x != employee_line_x + boxSize * 2) {
-                    if (j != customerID) {
-                        customers[j].target_x += boxSize * 2
-                    }
+                    customers[j].target_x += boxSize * 2
                 }
             }
             --employee_line
@@ -109,37 +117,59 @@ function start() {
             const atmID = data[3] * 1
             customers[customerID].setTarget(atm_line_x + boxSize * 2, atms[atmID].y - boxSize / 2)
             for(let j=0; j < customers.length; ++j) {
-                if(customers[j].y == atm_line_y && customers[j].target_y == atm_line_y && customers[j].x != atm_line_x + boxSize * 2
-                    && customers[j].target_x != atm_line_x + boxSize * 2) {
-                    if (j != customerID) {
-                        customers[j].target_x += boxSize * 2
-                    }
+                if((customers[j].y == atm_line_y || customers[j].y == height / 2) && customers[j].target_y == atm_line_y 
+                    && customers[j].x != atm_line_x + boxSize * 2 && customers[j].target_x != atm_line_x + boxSize * 2) {
+                    customers[j].target_x += boxSize * 2
                 }
             }
             --atm_line
         }
 
         if(eventType == 4) {
-            customers[customerID].target_x = -100
+            customers[customerID].target_x = -1e7
         }
 
-        if(currentTime != data[0] * 1) {
+        if(eventType == 5) {
+            customers[customerID].target_x = -1e7
+            for(let j=0; j < customers.length; ++j) {
+                if((customers[j].y == employee_line_y || customers[j].y == height / 2) && customers[j].target_y == employee_line_y 
+                    && customers[j].x < customers[customerID].x) {
+                    customers[j].target_x += boxSize * 2
+                }
+            }
+            --employee_line
+        }
+
+        if(eventType == 6) {
+            customers[customerID].target_x = -1e7
+            for(let j=0; j < customers.length; ++j) {
+                if((customers[j].y == atm_line_y || customers[j].y == height / 2) && customers[j].target_y == atm_line_y
+                    && customers[j].x < customers[customerID].x) {
+                    customers[j].target_x += boxSize * 2
+                }
+            }
+            --atm_line
+        }
+
+        if(i < input.length - 1 && data[0] * 1 != input[i+1].split(' ')[0] * 1) {
             intervalCount = 0
-            const interval = setInterval(animate, 50)
+            const interval = setInterval(animate, 30)
             setTimeout(function(){ 
                 clearInterval(interval);
-                if(i < input.length) {
+                for(let j=0; j < customers.length; ++j) {
+                    customers[j].gotoTarget()
+                }
+                if(i < input.length - 1) {
                     ++i;
                     step();
                 }
-            }, 1000)
+            }, speed)
         } else {
-            if (i < input.length) {
+            if (i < input.length - 1) {
                 ++i
                 step()
             }
         }
-        currentTime = data[0] * 1
     }
 
     for(let i=0; i < employees.length; ++i) {
@@ -169,7 +199,7 @@ function animate() {
 
     for(let i=0; i < customers.length; ++i) {
         if((customers[i].target_x > 0 && customers[i].target_y > 0) || (customers[i].target_x < 0 && customers[i].x > 0)) {
-            customers[i].updatePos(intervalCount/20)
+            customers[i].updatePos(intervalCount*30/speed)
             if(customers[i].x > 0) {
                 c.beginPath()
                 c.arc(customers[i].x, customers[i].y, boxSize / 2, 0, 2*Math.PI)
