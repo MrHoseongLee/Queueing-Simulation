@@ -1,0 +1,23 @@
+body {
+    margin: 0;
+}
+
+h1 {
+    font-size: 36pt;
+}
+
+div {
+    text-align: center;
+}
+
+#input_logs {
+    font-size: 16pt;
+    font-family: "Lucida Console", Courier, monospace;
+    resize: none;
+}
+
+button {
+    font-size: 16pt;
+    display: block;
+    margin: 10px auto;
+}
