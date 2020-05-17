@@ -38,6 +38,10 @@ const timePerStep = 1000
 
 function start() {
     const input = textBox.value.split(/[\n\r]+/)
+    wrapper.style.display = 'block'
+    timeText.style.display = 'inline'
+    speedSlider.style.display = 'inline'
+    speedSlider.value = speed / 30
     title.style.display = 'none'
     textBox.style.display = 'none'
     startButton.style.display = 'none'
@@ -79,6 +83,7 @@ function start() {
     let i = 1
 
     function step() {
+        speed = speedSlider.value * 30
         const data = input[i].split(' ')
         const eventType = data[1] * 1
         const customerID = data[2] * 1
@@ -170,6 +175,12 @@ function start() {
                 step()
             }
         }
+
+        if(data[0] * 1 % 60 >= 10) {
+            timeText.innerHTML = "" + (Math.floor(data[0] * 1 / 60)) + ":" + (data[0] * 1 % 60)
+        } else {
+            timeText.innerHTML = "" + (Math.floor(data[0] * 1 / 60)) + ":0" + (data[0] * 1 % 60)
+        }
     }
 
     for(let i=0; i < employees.length; ++i) {
@@ -216,8 +227,15 @@ function animate() {
 
 const title = document.getElementById("title")
 const textBox = document.getElementById("input_logs")
+textBox.value = ""
 const startButton = document.getElementById("start")
 const canvas = document.querySelector("canvas")
+const wrapper = document.getElementById("wrapper")
+const timeText = document.getElementById("time")
+const speedSlider = document.getElementById("speed")
+wrapper.style.display = 'none'
+timeText.style.display = 'none'
+speedSlider.style.display = 'none'
 var c
 var height
 var customers

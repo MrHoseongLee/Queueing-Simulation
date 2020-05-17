@@ -15,6 +15,25 @@ div {
     text-align: center;
 }
 
+#wrapper {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 10px auto;
+    font-size: 36pt;
+    position: absolute;
+    z-index: 2;
+}
+
+#time {
+    font-size: 36pt;
+}
+
+#speed {
+    margin-left: 20px;
+}
+
 #input_logs {
     font-size: 16pt;
     font-family: "Lucida Console", Courier, monospace;
