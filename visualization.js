@@ -164,16 +164,24 @@ function start() {
                 for(let j=0; j < customers.length; ++j) {
                     customers[j].gotoTarget()
                 }
-                if(i < input.length - 1) {
-                    ++i;
-                    step();
-                }
+                ++i;
+                step();
             }, speed)
         } else {
             if (i < input.length - 1) {
                 ++i
                 step()
             }
+        }
+
+        if(i == input.length - 1) {
+            const interval = setInterval(animate, 30)
+            setTimeout(function(){ 
+                clearInterval(interval);
+                for(let j=0; j < customers.length; ++j) {
+                    customers[j].gotoTarget()
+                }
+            }, speed)
         }
 
         if(data[0] * 1 % 60 >= 10) {
